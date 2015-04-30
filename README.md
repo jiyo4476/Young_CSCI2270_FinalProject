@@ -11,3 +11,8 @@ tree will have linked lists running off the names which will store messages and 
 
 On exit, data will be stored in seperate text file which will be opened with the program is
 opened.
+
+
+DATA IS OUTDATED AND NOT FUNCTIONAL,
+
+Finished Data will be Uploaded when I get to my files on my home Desktop.
