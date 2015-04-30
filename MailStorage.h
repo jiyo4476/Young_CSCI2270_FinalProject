@@ -35,23 +35,25 @@ class MailStorage {
         ~MailStorage();
         void printAccounts();
         void insertAccount(std::string in_userName, std::string in_password);
-        Account* findAccount(std::string in_title);
-        void deleteAccount(std::string in_title);
+        //Account* findAccount(std::string in_title);
+        int findAccount(std::string in_name);
+        void deleteAccount(std::string in_name);
         //Mail Linked List Functions
-        void printMail(); //post order transversal for printing all mail
+        void printMail(std::string in_Name); //post order transversal for printing all mail
         void printMail(int num);
+        void deleteAllMail(std:string in_name);'
+        void sendMail(std::string in_name, std::string message);
 
 
         //Mail Linked List Functions
-        int getNewMail();
+        int getNewMail(std::string in_Name);
 
     protected:
     private:
         int tableSize = 10;
         std::vector<Account> *hashTable[10] = { NULL };
         int hashVal(std::string name, int s);
-
-
+        bool checkPass(std::string name, std::string password);
 };
 
 #endif // HASHTABLE_H

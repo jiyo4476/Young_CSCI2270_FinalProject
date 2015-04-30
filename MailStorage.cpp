@@ -1,5 +1,6 @@
 #include "MailStorage.h"
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -68,7 +69,8 @@ void MailStorage::insertAccount(string name, string password){
 }
 
 //searches for Account and returns node pointer
-Account *MailStorage::findAccount(string in_name){
+int MailStorage::findAccount(string in_name){
+//void MailStorage::findAccount(string in_name){
 	int index = hashVal(in_name,tableSize);
 	bool found = false;
 
@@ -85,7 +87,7 @@ Account *MailStorage::findAccount(string in_name){
 				found = true;
 				//Account *temp;
 				//temp = (*hashTable[index])[i];
-				//return temp;
+				return i;
 				break;
 			}
 		}
@@ -94,11 +96,11 @@ Account *MailStorage::findAccount(string in_name){
 	{
 		cout << "not found" << endl;
 	}
-	return;
+	return -1;
 }
 
-void MailStorage::deleteAccount(){
-	int index = hashVal(name,tableSize);
+void MailStorage::deleteAccount(string in_name){
+	int index = hashVal(in_name,tableSize);
 	bool found = false;
 
 	// If there is a node at this hash location.
@@ -108,7 +110,7 @@ void MailStorage::deleteAccount(){
 		for (int i = 0; i < hashTable[index]->size(); i++)
 		{
 			// If we find the movie in the vector, delete it.
-			if ((*hashTable[index])[i].title == name)
+			if ((*hashTable[index])[i].userName == in_name)
 			{
 				hashTable[index]->erase(hashTable[index]->begin() + i);
 				found = true;
@@ -129,26 +131,134 @@ void MailStorage::deleteAccount(){
 	return;
 }
 
+int MailStorage::getNewMail(string in_Name){
+    //Find index of the Account
+	int index = hashVal(in_Name,tableSize);
+	//find where the Account is in Chaining
+	int i = findAccount(in_Name);
+	//go to Account and count mail
+	Mail *node = ((*hashTable[index])[i].mailHead;
+	int c = 0; // counting variable
+	//counts the mail until the node is finished
+	while(node != NULL){
+        c++;
+        node = node->next;
+	}
+	//return ammount of mail
+	return c;
+}
+
 void MailStorage::printMail(string in_Name){
+    //Find index of the Account
+	int index = hashVal(in_Name,tableSize);
+	//find where the Account is in Chaining
+	int i = findAccount(in_Name);
+	//go to Account at index and i
+	//Checks if there is mail
+	if(getNewMail((*hashTable[index])[i]) > 0){
+        //If there is mail
+        Mail *node = (*hashTable[index])[i]->mailHead;
+        //Mail counter
+        int c = 1;
+        while(node != NULL){
+            cout << "Message " << c << ":" << endl << node->message << endl;
+        }
+	}
+
 
 }
 
-void MailStorage::printMail(int ){
-
-}
-
-int MailStorage::getNewMail(){
-
-}
-
-void MailStorage::getNewMail(){
-
+void MailStorage::printMail(int s){
+    //Find index of the Account
+	int index = hashVal(in_Name,tableSize);
+	//find where the Account is in Chaining
+	int i = findAccount(in_Name);
+	//go to Account at index and i
+	//Checks if there is mail
+	if(getNewMail((*hashTable[index])[i]) > 0){
+        //If there is mail
+        Mail *node = (*hashTable[index])[i]->mailHead;
+        //Mail counter
+        int c = 1;
+        while(node != NULL){
+            cout << "Message " << c << ":" << endl << node->message << endl;
+        }
+	}
 }
 
 int MailStorage::hashVal(string name, int s){
+	int sum = 0;
 
+    for (int i = 1; i < name.length(); i++)
+    {
+    	sum = sum + name[i];  //ascii value of ith character in the string
+    }
+
+    sum = sum % s;
+    return sum;
 }
 
+//Private Function that Checks the Password against the password on file
+bool MailStorage::checkPass(string name, string pass){
+    //Find index of the Account
+	int index = hashVal(name,tableSize);
+	//find where the Account is in Chaining
+	int i = findAccount(name);
+	if(i >= 0){
+        if((*hashTable[index])[i]->password == pass){
+            cout << "Logged in. Successful" << endl;
+            return true;
+        }else{
+            cout << "Incorrect UserName or Password" << endl;
+            return false;
+	}
+	} else {
+        cout << "User Not Found" << endl;
+	}
+}
 
+//Deletes all mail occuring in an account
+void MailStorage::deleteAllMail(string in_name){
+    //Find index of the Account
+	int index = hashVal(name,tableSize);
+	//find where the Account is in Chaining
+	int i = findAccount(name);
+	if(getNewMail((*hashTable[index])[i]) > 0){
+        //If there is mail
+        Mail *node = (*hashTable[index])[i]->mailHead;
+        //Mail counter
+        while(node != NULL){
+            node = node->next;
+        }
+}
 
-
+//sends mail from one account to another
+void MailStorage::sendMail(string name, string message){
+    //Find index of the Account
+	int index = hashVal(name,tableSize);
+	//find where the Account is in Chaining
+	int i = findAccount(name);
+	if(i >= 0){
+        //Found recipient
+        Mail node = (*hashTable[index])[i]->mailHead;
+        if((*hashTable[index])[i]->mailHead == NULL){
+            //Add Message
+            temp = new Mail;
+            temp.message = message;
+            temp.next = NULL;
+            (*hashTable[index])[i]->mailHead = temp;
+        } else {
+            //go through list til the end
+            while(node->next != NULL){
+                node = node->next;
+            }
+            temp = new Mail;
+            temp.message = message;
+            temp.next = NULL;
+            node->next = temp;
+        }
+	}else {
+	    //Account doesnt exist
+        cout << "Recipient " << name << "  was not found."<< endl;
+	}
+}
