@@ -7,4 +7,4 @@ web service.
 
 Data Types Used
 I plan to use a Hash table, with each index as an Linked List. You will be able to log in and send mail, and log out.
-On exit, data will be stored in separate text file which will be opened with the program is opened.
+On exit, All data will be lost.
