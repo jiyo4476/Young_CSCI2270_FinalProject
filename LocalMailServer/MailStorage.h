@@ -71,10 +71,11 @@ class MailStorage {
         //Hash Table Functions
         MailStorage(); //constructor
         ~MailStorage(); //Deconstructor
-        void insertAccount(std::string in_userName, std::string in_password); //Create a New Account  CHECK
+        void insertAccount(std::string in_userName, std::string in_password); //Create a New Account
         void printAccounts(); //Prints All Accounts in Hash Table CHECK
-        int findAccount(std::string in_name); //Finds Account in Vector and returns the I value  CHECK
-        void deleteAccount(std::string in_name); // Deletes Account Out of Hash Table Including its mail CHECK
+        int findAccount(std::string in_name); //Finds Account in Vector and returns the I value
+        void deleteAccount(std::string in_name); // Deletes Account Out of Hash Table Including its mail
+        void deleteAllAccounts();
         //Mail Linked List Functions
         void printMail(); //post order transversal for printing all mail
         void printMail(int num); // Print out a Cretain Email in the Vector

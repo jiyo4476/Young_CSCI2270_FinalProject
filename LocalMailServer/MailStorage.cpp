@@ -125,6 +125,17 @@ void MailStorage::deleteAccount(string in_name){
     }
 }
 
+void MailStorage::deleteAllAccounts(){
+    //Delete all mail
+    for(int i = 0; i < tableSize; i++){
+        if(hashTable[i] != NULL){
+            while(hashTable[i] != NULL){
+                delete hashTable[i];
+            }
+        }
+    }
+}
+
 
 void MailStorage::printMail(){
     if(OpenSession.open == true){
@@ -136,9 +147,10 @@ void MailStorage::printMail(){
             //Mail counter
             int c = 1;
             while(node != NULL){
-                cout << "Message " << c << ":" << endl << node->message << endl;
+                cout << "Message " << c << ":" << endl << node->message << endl << endl;
+                node = node->next;
             }
-            cout << "1- Delete All? " << endl;
+            cout << "1- Delete All Mail? " << endl;
             cout << "2- OpenMail" << endl;
             cout << "3- Main Menu" << endl;
             cin >> input;
@@ -159,15 +171,19 @@ void MailStorage::printMail(){
             }
 
         }
-    } else    //If Not Logged in
+    } else{    //If Not Logged in
         cout << "You are Not Logged in." << endl;
+    }
 }
 
 void MailStorage::printMail(int num){
     if(OpenSession.open == true){
+        if(num > getNewMail() || num < getNewMail()) {
+                cout << "Invalid Selection" << endl;
+        } else {
         //sets C to the index of the mail
         int input;
-        int c = num--;
+        int c = num - 1;
         Mail *node = (*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead;
         for(int i =0; i < c; i++){
             node=node->next;
@@ -175,19 +191,25 @@ void MailStorage::printMail(int num){
 
         cout << "Message " << num << ":" << endl << node->message << endl;
         cout << "----------------------------------------------" << endl;
-        cout << "1- Delete? " << endl;
+        cout << "1- Delete Message? " << endl;
         cout << "2- Main Menu" << endl;
         cin >> input;
         switch (input){
             case 1:
                 cout << "Deleteing....." << endl;
-                deleteAllMail();
+                deleteMail(c);
                 break;
             case 2:
                 //leaving the function
                 break;
+            default:{
+                cout << "Invalid Input" << endl;
+                cin.clear();
+                cin.ignore(10000,'\n');
+                break;
+            }
         }
-
+        }
     }else {  //If Not Logged in
         cout << "You are Not Logged in." << endl;
     }
@@ -227,18 +249,10 @@ int MailStorage::getNewMail(){
             c++;
             node = node->next;
         }
-        //return ammount
-        }
-        //go to Account and count mail
-        Mail *node = ((*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead);
-        int c = 0; // counting variable
-        //counts the mail until the node is finished
-        while(node != NULL){
-            c++;
-            node = node->next;
-        }
-    //return ammount of mail
-    return c;
+        return c;
+    } else {
+        cout << "Your are not logged in." << endl;
+    }
 }
 
 //Public Function that Checks the Password against the password on file
@@ -254,6 +268,7 @@ bool MailStorage::LogIn(string name, string in_pass){
             OpenSession.userName = (*hashTable[index])[i].userName;
             OpenSession.index = index;
             OpenSession.vecIndex = i;
+            OpenSession.open = true;
             cout << "Logged in. Successful" << endl;
             return true;
         }else{
@@ -298,6 +313,7 @@ void MailStorage::sendMail(string in_rec, string message){
                 //Add Message
                 Mail *temp = new Mail(OpenSession.userName, message);
                 (*hashTable[index])[i].mailHead = temp;
+                cout << "Your Mail has been sent." << endl;
             } else {
                 //go through list til the end
                 while(node->next != NULL){
@@ -306,6 +322,7 @@ void MailStorage::sendMail(string in_rec, string message){
                 //place message at the end.
                 Mail *temp = new Mail(OpenSession.userName, message);
                 node->next = temp;
+                cout << "Your Mail has been sent." << endl;
             }
         } else {
 	    //Account doesnt exist
