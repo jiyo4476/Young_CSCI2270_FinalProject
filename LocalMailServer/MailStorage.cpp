@@ -148,6 +148,7 @@ void MailStorage::printMail(){
             int c = 1;
             while(node != NULL){
                 cout << "Message " << c << ":" << endl << node->message << endl << endl;
+                c++;
                 node = node->next;
             }
             cout << "1- Delete All Mail? " << endl;
@@ -218,16 +219,17 @@ void MailStorage::printMail(int num){
 void MailStorage::deleteMail(int num){
     if(OpenSession.open == true){
         //sets C to the index of the mail
-        int c = num--;
+        int c = 1;
         Mail *node = (*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead;
         Mail *prvNode;
 
-        for(int i =0; i < c; i++){
+        while(c < num){
             prvNode = node;
             node = node->next;
+            c++;
         }
         //if next node doesnt exist
-        if(node->next = NULL){
+        if(node->next == NULL){
             delete[] node;
         //Next node does exist
         } else {
@@ -283,17 +285,21 @@ bool MailStorage::LogIn(string name, string in_pass){
 
 //Deletes all mail occuring in an account
 void MailStorage::deleteAllMail(){
+    Mail *temp;
     //if Session is Open
     if(OpenSession.open == true){
+        //if has mail
         if(getNewMail() > 0){
             //If there is mail
             Mail *node = (*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead;
             //Mail counter
             while(node != NULL){
-                Mail *temp = node->next;
+                temp = node->next;
                 delete []node;
                 node = temp;
             }
+        } else {
+            cout << "No Mail to delete" << endl;
         }
     }
 }
