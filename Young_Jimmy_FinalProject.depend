@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1430619292 source:/home/user/Desktop/Assignment5/Young_Jimmy_FinalProject/MailStorage.cpp
+	"MailStorage.h"
+	<iostream>
+	<vector>
+	<stdlib.h>
+
+1430619292 /home/user/Desktop/Assignment5/Young_Jimmy_FinalProject/MailStorage.h
+	<string>
+	<vector>
+

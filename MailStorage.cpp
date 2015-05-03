@@ -1,6 +1,7 @@
 #include "MailStorage.h"
 #include <iostream>
 #include <vector>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -22,28 +23,22 @@ MailStorage::~MailStorage(){
     }
 }
 
-//Print All Accounts
-void MailStorage::printAccounts(){
-    bool emptyTable = true;
+//Hash Function
+int MailStorage::hashVal(string name){
+	int sum = 0;
 
-    for(int i = 0; i < tableSize; i++){
-        if(hashTable[i] != NULL){
-            for(int j = 0; j < hashTable[i]->size(); j++){
-                cout << (*hashTable[i])[j].userName << endl;
-                emptyTable = false;
-            }
-        }
+    for (int i = 1; i < name.length(); i++)
+    {
+    	sum = sum + name[i];  //ascii value of ith character in the string
     }
 
-    if(emptyTable == true){
-        cout << "empty" << endl;
-        return;
-    }
+    sum = sum % tableSize;
+    return sum;
 }
 
 //Insert Account into tree
 void MailStorage::insertAccount(string name, string password){
-	int index = hashVal(name,tableSize);
+	int index = hashVal(name);
 	// If there is nothing in this location.
 	if (hashTable[index] == NULL)
 	{
@@ -68,15 +63,35 @@ void MailStorage::insertAccount(string name, string password){
 	return;
 }
 
+//Print All Accounts
+void MailStorage::printAccounts(){
+    bool emptyTable = true;
+
+    for(int i = 0; i < tableSize; i++){
+        if(hashTable[i] != NULL){
+            emptyTable = false;
+            for(int j = 0; j < hashTable[i]->size(); j++){
+                cout << (*hashTable[i])[j].userName << endl;
+            }
+        } else {
+                break; // break out of for loop if There are no Accounts
+        }
+    }
+
+    if(emptyTable == true){
+        cout << "empty" << endl;
+        return;
+    }
+}
+
 //searches for Account and returns node pointer
 int MailStorage::findAccount(string in_name){
 //void MailStorage::findAccount(string in_name){
-	int index = hashVal(in_name,tableSize);
+	int index = hashVal(in_name);
 	bool found = false;
 
 	// If there is a node at this hash location.
-	if (hashTable[index] != NULL)
-	{
+	if (hashTable[index] != NULL){
 		// Loop through every vector index at this hash location.
 		for (int i = 0; i < hashTable[index]->size(); i++)
 		{
@@ -85,180 +100,229 @@ int MailStorage::findAccount(string in_name){
 			{
 				cout << index << ":" << (*hashTable[index])[i].userName << endl;
 				found = true;
-				//Account *temp;
-				//temp = (*hashTable[index])[i];
 				return i;
-				break;
 			}
 		}
 	}
+	//Return -1 if false
 	if (found == false)
 	{
 		cout << "not found" << endl;
+        return -1;
 	}
-	return -1;
 }
 
 void MailStorage::deleteAccount(string in_name){
-	int index = hashVal(in_name,tableSize);
-	bool found = false;
 
-	// If there is a node at this hash location.
-	if (hashTable[index] != NULL)
-	{
-		// Loop through every vector index at this hash location.
-		for (int i = 0; i < hashTable[index]->size(); i++)
-		{
-			// If we find the movie in the vector, delete it.
-			if ((*hashTable[index])[i].userName == in_name)
-			{
-				hashTable[index]->erase(hashTable[index]->begin() + i);
-				found = true;
-				break;
-			}
-		}
-		// If this was the last element in this chain, delete the vector.
-		if (hashTable[index]->size() == 0)
-		{
-			delete hashTable[index];
-			hashTable[index] = NULL;
-		}
-	}
-	if (found == false)
-	{
+	int index = hashVal(in_name);
+	int found = findAccount(in_name);
+
+	if(found >= 0) {//If Account is found
+        //Delete Account
+        hashTable[index]->erase(hashTable[index]->begin() + found);
+    }else { //Account is not found
 		cout << "not found" << endl;
-	}
-	return;
-}
-
-int MailStorage::getNewMail(string in_Name){
-    //Find index of the Account
-	int index = hashVal(in_Name,tableSize);
-	//find where the Account is in Chaining
-	int i = findAccount(in_Name);
-	//go to Account and count mail
-	Mail *node = ((*hashTable[index])[i].mailHead;
-	int c = 0; // counting variable
-	//counts the mail until the node is finished
-	while(node != NULL){
-        c++;
-        node = node->next;
-	}
-	//return ammount of mail
-	return c;
-}
-
-void MailStorage::printMail(string in_Name){
-    //Find index of the Account
-	int index = hashVal(in_Name,tableSize);
-	//find where the Account is in Chaining
-	int i = findAccount(in_Name);
-	//go to Account at index and i
-	//Checks if there is mail
-	if(getNewMail((*hashTable[index])[i]) > 0){
-        //If there is mail
-        Mail *node = (*hashTable[index])[i]->mailHead;
-        //Mail counter
-        int c = 1;
-        while(node != NULL){
-            cout << "Message " << c << ":" << endl << node->message << endl;
-        }
-	}
-
-
-}
-
-void MailStorage::printMail(int s){
-    //Find index of the Account
-	int index = hashVal(in_Name,tableSize);
-	//find where the Account is in Chaining
-	int i = findAccount(in_Name);
-	//go to Account at index and i
-	//Checks if there is mail
-	if(getNewMail((*hashTable[index])[i]) > 0){
-        //If there is mail
-        Mail *node = (*hashTable[index])[i]->mailHead;
-        //Mail counter
-        int c = 1;
-        while(node != NULL){
-            cout << "Message " << c << ":" << endl << node->message << endl;
-        }
-	}
-}
-
-int MailStorage::hashVal(string name, int s){
-	int sum = 0;
-
-    for (int i = 1; i < name.length(); i++)
-    {
-    	sum = sum + name[i];  //ascii value of ith character in the string
     }
-
-    sum = sum % s;
-    return sum;
 }
 
-//Private Function that Checks the Password against the password on file
-bool MailStorage::checkPass(string name, string pass){
+
+void MailStorage::printMail(){
+    if(OpenSession.open == true){
+        //Checks if there is mail
+        if(getNewMail() > 0){
+            int input; //For Menu Options After
+            //If there is mail
+            Mail *node = (*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead;
+            //Mail counter
+            int c = 1;
+            while(node != NULL){
+                cout << "Message " << c << ":" << endl << node->message << endl;
+            }
+            cout << "1- Delete All? " << endl;
+            cout << "2- OpenMail" << endl;
+            cout << "3- Main Menu" << endl;
+            cin >> input;
+            switch (input){
+                case 1:
+                    cout << "Deleteing....." << endl;
+                    deleteAllMail();
+                    break;
+                case 2:
+                    int input1;
+                    cout << "Enter The Message Number that you wish to open." << endl;
+                    cin >> input1;
+                    printMail(input1);
+                    break;
+                case 3:
+                    //leaving the function
+                    break;
+            }
+
+        }
+    } else    //If Not Logged in
+        cout << "You are Not Logged in." << endl;
+}
+
+void MailStorage::printMail(int num){
+    if(OpenSession.open == true){
+        //sets C to the index of the mail
+        int input;
+        int c = num--;
+        Mail *node = (*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead;
+        for(int i =0; i < c; i++){
+            node=node->next;
+        }
+
+        cout << "Message " << num << ":" << endl << node->message << endl;
+        cout << "----------------------------------------------" << endl;
+        cout << "1- Delete? " << endl;
+        cout << "2- Main Menu" << endl;
+        cin >> input;
+        switch (input){
+            case 1:
+                cout << "Deleteing....." << endl;
+                deleteAllMail();
+                break;
+            case 2:
+                //leaving the function
+                break;
+        }
+
+    }else {  //If Not Logged in
+        cout << "You are Not Logged in." << endl;
+    }
+}
+
+void MailStorage::deleteMail(int num){
+    if(OpenSession.open == true){
+        //sets C to the index of the mail
+        int c = num--;
+        Mail *node = (*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead;
+        Mail *prvNode;
+
+        for(int i =0; i < c; i++){
+            prvNode = node;
+            node = node->next;
+        }
+        //if next node doesnt exist
+        if(node->next = NULL){
+            delete[] node;
+        //Next node does exist
+        } else {
+            prvNode->next = node->next;
+            delete[] node;
+        }
+    }else {   //If Not Logged in
+        cout << "You are Not Logged in." << endl;
+    }
+}
+
+int MailStorage::getNewMail(){
+    if(OpenSession.open == true){
+        //go to Account and count mail
+        Mail *node = ((*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead);
+        int c = 0; // counting variable
+        //counts the mail until the node is finished
+        while(node != NULL){
+            c++;
+            node = node->next;
+        }
+        //return ammount
+        }
+        //go to Account and count mail
+        Mail *node = ((*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead);
+        int c = 0; // counting variable
+        //counts the mail until the node is finished
+        while(node != NULL){
+            c++;
+            node = node->next;
+        }
+    //return ammount of mail
+    return c;
+}
+
+//Public Function that Checks the Password against the password on file
+bool MailStorage::LogIn(string name, string in_pass){
     //Find index of the Account
-	int index = hashVal(name,tableSize);
+	int index = hashVal(name);
 	//find where the Account is in Chaining
 	int i = findAccount(name);
+
+	//If Account is Found
 	if(i >= 0){
-        if((*hashTable[index])[i]->password == pass){
+        if((*hashTable[index])[i].password == in_pass){
+            OpenSession.userName = (*hashTable[index])[i].userName;
+            OpenSession.index = index;
+            OpenSession.vecIndex = i;
             cout << "Logged in. Successful" << endl;
             return true;
         }else{
             cout << "Incorrect UserName or Password" << endl;
             return false;
-	}
+        }
 	} else {
         cout << "User Not Found" << endl;
+        return false;
 	}
 }
 
 //Deletes all mail occuring in an account
-void MailStorage::deleteAllMail(string in_name){
-    //Find index of the Account
-	int index = hashVal(name,tableSize);
-	//find where the Account is in Chaining
-	int i = findAccount(name);
-	if(getNewMail((*hashTable[index])[i]) > 0){
-        //If there is mail
-        Mail *node = (*hashTable[index])[i]->mailHead;
-        //Mail counter
-        while(node != NULL){
-            node = node->next;
+void MailStorage::deleteAllMail(){
+    //if Session is Open
+    if(OpenSession.open == true){
+        if(getNewMail() > 0){
+            //If there is mail
+            Mail *node = (*hashTable[OpenSession.index])[OpenSession.vecIndex].mailHead;
+            //Mail counter
+            while(node != NULL){
+                Mail *temp = node->next;
+                delete []node;
+                node = temp;
+            }
         }
+    }
 }
 
 //sends mail from one account to another
-void MailStorage::sendMail(string name, string message){
-    //Find index of the Account
-	int index = hashVal(name,tableSize);
-	//find where the Account is in Chaining
-	int i = findAccount(name);
-	if(i >= 0){
-        //Found recipient
-        Mail node = (*hashTable[index])[i]->mailHead;
-        if((*hashTable[index])[i]->mailHead == NULL){
-            //Add Message
-            temp = new Mail;
-            temp.message = message;
-            temp.next = NULL;
-            (*hashTable[index])[i]->mailHead = temp;
-        } else {
-            //go through list til the end
-            while(node->next != NULL){
-                node = node->next;
+void MailStorage::sendMail(string in_rec, string message){
+    if(OpenSession.open == true){
+        //Find index of the Recipiant
+        int index = hashVal(in_rec);
+        //find where the Account is in Chaining
+        int i = findAccount(in_rec);
+        //If Found Recipient
+        if(i >= 0){
+            //Found recipient
+            Mail *node = (*hashTable[index])[i].mailHead;
+            if((*hashTable[index])[i].mailHead == NULL){
+                //Add Message
+                Mail *temp = new Mail(OpenSession.userName, message);
+                (*hashTable[index])[i].mailHead = temp;
+            } else {
+                //go through list til the end
+                while(node->next != NULL){
+                    node = node->next;
+                }
+                //place message at the end.
+                Mail *temp = new Mail(OpenSession.userName, message);
+                node->next = temp;
             }
-            temp = new Mail;
-            temp.message = message;
-            temp.next = NULL;
-            node->next = temp;
-        }
-	}else {
+        } else {
 	    //Account doesnt exist
-        cout << "Recipient " << name << "  was not found."<< endl;
+        cout << "Recipient " << in_rec << "  was not found."<< endl;
+        }
+    } else {
+	    //Account doesnt exist
+        cout << "You are not Logged in."<< endl;
 	}
+}
+
+//Log Out of Account
+void MailStorage::LogOut(){
+    OpenSession.open = false;
+}
+
+//Returns UserName
+string MailStorage::getUserName(){
+    return OpenSession.userName;
 }
